@@ -8,11 +8,11 @@ ThreadLvgl threadLvgl(30);
 
 int main() {
 
-    threadLvgl.lock();
+    threadLvgl.lock();//mutex a utilise pour les affichages
 
-    lv_demo_widgets();
+    lv_demo_widgets();//creation des affichages
 
-    threadLvgl.unlock();
+    threadLvgl.unlock();//mutex a utilise pour les affichages
 
     while (1) {
         // put your main code here, to run repeatedly:
