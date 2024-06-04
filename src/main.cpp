@@ -6,22 +6,22 @@
 
 ThreadLvgl threadLvgl(30);
 
+AnalogIn sensor(A0); //pin 9 de l'arduino pour capteur
+DigitalOut buzzer(D2); //pin 17 de l'arduino pour buzzer
+
 int main() {
 
-    const int lightSensor=9;//pin 9 de l'arduino pour capteur
-    const int buzzer=17;
-    float valeur;
-    threadLvgl.lock();//mutex a utilise pour les affichages
+    buzzer=1; //buzzer à 1 (bruit)
+    buzzer=0; //buzzer à 0 (pas de bruit)
+    threadLvgl.lock(); //mutex a utilise pour les affichages
 
-    lv_demo_widgets();//creation des affichages
-
-    threadLvgl.unlock();//mutex a utilise pour les affichages
 
     while (1) {
         // put your main code here, to run repeatedly:
-        ThisThread::sleep_for(10ms);
-        valeur=analogin_read(0);
-        printf("%f",valeur);
+        //ThisThread::sleep_for(10ms);//tempo 10ms
+        lv_demo_widgets(); //creation des affichages
+        
+        threadLvgl.unlock(); //mutex a utilise pour les affichages
     }
 }
 
