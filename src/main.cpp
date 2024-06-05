@@ -7,19 +7,18 @@
 // Définition du taux de rafraîchissement de l'affichage LVGL
 ThreadLvgl threadLvgl(30);
 
-// Prototype de la fonction d'affichage
+// Prototype des fonctions
 void lv_affiche_text(float valSensor);
 
-// Déclaration des périphériques matériels
+// Déclaration E/S
 AnalogIn sensor(A0);       // Capteur de luminosité sur A0
 DigitalOut buzzer(D2);     // Buzzer sur D2
 
 int main() {
-    // Initialisation du buzzer
+    
     buzzer = 1; // Active le buzzer (bruit)
     buzzer = 0; // Désactive le buzzer (pas de bruit)
     
-    // Boucle principale
     while (1) {
         // Lecture de la valeur du capteur
         float valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
@@ -38,35 +37,35 @@ int main() {
 void lv_affiche_text(float valSensor) {
     // Conversion de la valeur du capteur en chaîne de caractères
     char buf[32];
-    sprintf(buf, "Luminosite: %.2f", valSensor);
+    sprintf(buf, "Luminosite : %2f", valSensor);
 
-    // Création du style pour l'ombre du texte
+    // Create a style for the shadow
     static lv_style_t style_shadow;
     lv_style_init(&style_shadow);
     lv_style_set_text_opa(&style_shadow, LV_OPA_30);
     lv_style_set_text_color(&style_shadow, lv_color_black());
 
-    // Création d'un label pour l'ombre du texte (en arrière-plan)
+    //Create a label for the shadow first (it's in the background)
     static lv_obj_t *shadow_label = nullptr;
     if (shadow_label == nullptr) {
         shadow_label = lv_label_create(lv_scr_act());
         lv_obj_add_style(shadow_label, &style_shadow, 0);
     }
 
-    // Création du label principal
+    //Create the main label
     static lv_obj_t *main_label = nullptr;
     if (main_label == nullptr) {
         main_label = lv_label_create(lv_scr_act());
     }
     lv_label_set_text(main_label, buf); // Affichage de la valeur du capteur
 
-    // Mise à jour du texte pour le label de l'ombre
+    //Set the same text for the shadow label
     lv_label_set_text(shadow_label, lv_label_get_text(main_label));
 
-    // Positionnement du label principal
+    //Position the main label
     lv_obj_align(main_label, LV_ALIGN_CENTER, 0, 0);
 
-    // Déplacement du label de l'ombre vers le bas et la droite de 2 pixels
+    //Shift the second label down and to the right by 2 pixel
     lv_obj_align_to(shadow_label, main_label, LV_ALIGN_TOP_LEFT, 2, 2);
 }
 
