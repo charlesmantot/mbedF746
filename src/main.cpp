@@ -30,6 +30,12 @@ int main() {
         threadLvgl.lock();
         lv_affiche_text(valSensor); // Affichage de la valeur
         threadLvgl.unlock();
+        if(valSensor<0.5){ //si valeur du capteur inférieur à 0 alors le buzzer sonne
+            buzzer=1;
+        }
+        else { //sinon il ne sonne pas
+            buzzer =0;
+        }
         
         // Tempo de 100 ms entre les lectures
         ThisThread::sleep_for(100ms);
@@ -40,8 +46,7 @@ int main() {
 void lv_affiche_text(float valSensor) {
     // Conversion de la valeur du capteur en chaîne de caractères
     char buf[32];
-    //sprintf(buf, "Luminosite : %2f", valSensor);
-    printf("Luminosite : %f \r\n", valSensor);
+    sprintf(buf, "Luminosite : %2.2f", valSensor);//affiche sur l'écran la valeur du capteur
 
     // Create a style for the shadow
     static lv_style_t style_shadow;
