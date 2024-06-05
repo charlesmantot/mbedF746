@@ -4,55 +4,69 @@
 #include "demos/lv_demos.h"
 #include <cstdio>
 
+// Définition du taux de rafraîchissement de l'affichage LVGL
 ThreadLvgl threadLvgl(30);
 
-void lv_example_label_2(void);
-AnalogIn sensor(A0); //pin 9 de l'arduino pour capteur
-DigitalOut buzzer(D2); //pin 17 de l'arduino pour buzzer
+// Prototype de la fonction d'affichage
+void lv_affiche_text(float valSensor);
+
+// Déclaration des périphériques matériels
+AnalogIn sensor(A0);       // Capteur de luminosité sur A0
+DigitalOut buzzer(D2);     // Buzzer sur D2
 
 int main() {
-
-    buzzer=1; //buzzer à 1 (bruit)
-    buzzer=0; //buzzer à 0 (pas de bruit)
-    threadLvgl.lock(); //mutex a utilise pour les affichages
-    lv_example_label_2(); //affichage
-    //lv_demo_widgets(); //affichages démo
-    threadLvgl.unlock(); //mutex a utilise pour les affichages
+    // Initialisation du buzzer
+    buzzer = 1; // Active le buzzer (bruit)
+    buzzer = 0; // Désactive le buzzer (pas de bruit)
+    
+    // Boucle principale
     while (1) {
-        // put your main code here, to run repeatedly:
-        //ThisThread::sleep_for(10ms);//tempo 10ms
+        // Lecture de la valeur du capteur
+        float valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
         
-
-        threadLvgl.lock(); //mutex a utilise pour les affichages
-        threadLvgl.unlock(); //mutex a utilise pour les affichages
+        // Utilisation du mutex pour les affichages LVGL
+        threadLvgl.lock();
+        lv_affiche_text(valSensor); // Affichage de la valeur
+        threadLvgl.unlock();
+        
+        // Tempo de 100 ms entre les lectures
+        ThisThread::sleep_for(100ms);
     }
 }
-void lv_example_label_2(void)//fonction pour afficher sur un écran https://docs.lvgl.io/8.3/widgets/core/label.html?highlight=label
-{
-    /*Create a style for the shadow*/
+
+// Fonction pour afficher sur un écran LVGL
+void lv_affiche_text(float valSensor) {
+    // Conversion de la valeur du capteur en chaîne de caractères
+    char buf[32];
+    sprintf(buf, "Luminosite: %.2f", valSensor);
+
+    // Création du style pour l'ombre du texte
     static lv_style_t style_shadow;
     lv_style_init(&style_shadow);
     lv_style_set_text_opa(&style_shadow, LV_OPA_30);
     lv_style_set_text_color(&style_shadow, lv_color_black());
 
-    /*Create a label for the shadow first (it's in the background)*/
-    lv_obj_t * shadow_label = lv_label_create(lv_scr_act());
-    lv_obj_add_style(shadow_label, &style_shadow, 0);
+    // Création d'un label pour l'ombre du texte (en arrière-plan)
+    static lv_obj_t *shadow_label = nullptr;
+    if (shadow_label == nullptr) {
+        shadow_label = lv_label_create(lv_scr_act());
+        lv_obj_add_style(shadow_label, &style_shadow, 0);
+    }
 
-    /*Create the main label*/
-    lv_obj_t * main_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(main_label, "A simple method to create\n"
-                      "shadows on a text.\n"
-                      "It even works with\n\n"
-                      "newlines     and spaces.");
+    // Création du label principal
+    static lv_obj_t *main_label = nullptr;
+    if (main_label == nullptr) {
+        main_label = lv_label_create(lv_scr_act());
+    }
+    lv_label_set_text(main_label, buf); // Affichage de la valeur du capteur
 
-    /*Set the same text for the shadow label*/
+    // Mise à jour du texte pour le label de l'ombre
     lv_label_set_text(shadow_label, lv_label_get_text(main_label));
 
-    /*Position the main label*/
+    // Positionnement du label principal
     lv_obj_align(main_label, LV_ALIGN_CENTER, 0, 0);
 
-    /*Shift the second label down and to the right by 2 pixel*/
+    // Déplacement du label de l'ombre vers le bas et la droite de 2 pixels
     lv_obj_align_to(shadow_label, main_label, LV_ALIGN_TOP_LEFT, 2, 2);
 }
 
