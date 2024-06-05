@@ -3,6 +3,7 @@
 
 #include "demos/lv_demos.h"
 #include <cstdio>
+#include <stdio.h>
 
 // Définition du taux de rafraîchissement de l'affichage LVGL
 ThreadLvgl threadLvgl(30);
@@ -12,16 +13,18 @@ void lv_affiche_text(float valSensor);
 
 // Déclaration E/S
 AnalogIn sensor(A0);       // Capteur de luminosité sur A0
-DigitalOut buzzer(D2);     // Buzzer sur D2
+DigitalOut buzzer(D2);     // Buzzer sur D2B
+BufferedSerial pc(USBTX,USBRX,9600);
 
 int main() {
-    
+    float valSensor;
     buzzer = 1; // Active le buzzer (bruit)
     buzzer = 0; // Désactive le buzzer (pas de bruit)
+     
     
     while (1) {
         // Lecture de la valeur du capteur
-        float valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
+        valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
         
         // Utilisation du mutex pour les affichages LVGL
         threadLvgl.lock();
@@ -37,7 +40,8 @@ int main() {
 void lv_affiche_text(float valSensor) {
     // Conversion de la valeur du capteur en chaîne de caractères
     char buf[32];
-    sprintf(buf, "Luminosite : %2f", valSensor);
+    //sprintf(buf, "Luminosite : %2f", valSensor);
+    printf("Luminosite : %f \r\n", valSensor);
 
     // Create a style for the shadow
     static lv_style_t style_shadow;
