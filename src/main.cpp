@@ -1,5 +1,7 @@
 #include <mbed.h>
 #include <threadLvgl.h>
+#include <chrono>
+#include <ctime>
 
 #include "demos/lv_demos.h"
 #include <cstdio>
@@ -10,10 +12,12 @@ ThreadLvgl threadLvgl(30);
 
 // Prototype des fonctions
 void lv_affiche_text(float valSensor);
+void lv_affiche_time(void);
 void clavier(void);
 static void orga_saisie(lv_event_t * e);
 static void ta_event_cb(lv_event_t * e);
 static lv_obj_t * kb;
+static lv_obj_t * time_label;
 
 // Déclaration E/S
 AnalogIn sensor(A0);       // Capteur de luminosité sur A0
@@ -25,9 +29,10 @@ int main() {
     buzzer = 1; // Active le buzzer (bruit)
     buzzer = 0; // Désactive le buzzer (pas de bruit)
 
-    // Initialiser le clavier à l'écran
+    // Initialiser le clavier et l'affichage de l'heure à l'écran
     threadLvgl.lock();
     clavier();
+    lv_affiche_time();
     threadLvgl.unlock();
     
     while (1) {
@@ -37,6 +42,7 @@ int main() {
         // Utilisation du mutex pour les affichages LVGL
         threadLvgl.lock();
         lv_affiche_text(valSensor); // Affichage de la valeur
+        lv_affiche_time(); // Affichage de l'heure
         
         threadLvgl.unlock();
         if(valSensor < 0.5){ // Si valeur du capteur inférieur à 0 alors le buzzer sonne
@@ -87,6 +93,31 @@ void lv_affiche_text(float valSensor) {
     lv_obj_align_to(shadow_label, main_label, LV_ALIGN_TOP_LEFT, 2, 2);
 }
 
+// Fonction pour afficher l'heure actuelle sur un écran LVGL
+void lv_affiche_time(void) {
+    // Obtenir l'heure actuelle en UTC
+    time_t now = time(NULL);
+    struct tm *utc_time = gmtime(&now);
+
+    // Convertir l'heure UTC en heure de Paris
+    struct tm paris_time = *utc_time;
+    paris_time.tm_hour += 2; // Paris est UTC+2 en été (CEST)
+    mktime(&paris_time); // Normalise la structure tm
+
+    // Conversion de l'heure en chaîne de caractères
+    char buf[32];
+    strftime(buf, sizeof(buf), "Heure : %H:%M:%S", &paris_time);
+
+    // Création ou mise à jour du label pour l'heure
+    if (time_label == nullptr) {
+        time_label = lv_label_create(lv_scr_act());
+    }
+    lv_label_set_text(time_label, buf);
+
+    // Positionner le label de l'heure en bas au centre
+    lv_obj_align(time_label, LV_ALIGN_BOTTOM_MID, 0, -20);
+}
+
 void clavier(void) {
     /* Create the text area */
     lv_obj_t * ta = lv_textarea_create(lv_scr_act());
@@ -129,3 +160,9 @@ static void ta_event_cb(lv_event_t * e) {
         lv_textarea_set_text(ta, "");
     }
 }
+
+/*idee :
+  Pour le clavier numerique utiliser text auto-formatting
+  Pour affichage heure actu utiliser a clock from a meter
+  Pour affichage luminosite utiliser text shadow
+  */
