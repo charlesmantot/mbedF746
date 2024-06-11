@@ -10,12 +10,12 @@
 ThreadLvgl threadLvgl(30);
 
 // Prototype des fonctions
-void lv_affiche_text(float valSensor);
-void lv_affiche_time(void);
-void clavier(void);
-void lv_affiche_saisie(void);
-static void orga_saisie(lv_event_t * e);
-static void ta_event_cb(lv_event_t * e);
+void lv_affiche_text(float valSensor); //Fonction pour l'affichage de la luminosité
+void lv_affiche_time(void); // Fonction pour affichage de l'heure actuelle
+void clavier(void); // Fonction de création du clavier
+void lv_affiche_saisie(void); // Fonction pour afficher la saisie
+static void orga_saisie(lv_event_t * e); // Fonction pour l'organisation de la saisie
+static void ta_event_cb(lv_event_t * e); // Fonction pour le rappel des évennements
 static lv_obj_t * kb;
 static lv_obj_t * time_label;
 static lv_obj_t * ta;
