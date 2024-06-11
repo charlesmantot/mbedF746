@@ -2,7 +2,6 @@
 #include <threadLvgl.h>
 #include <chrono>
 #include <ctime>
-
 #include "demos/lv_demos.h"
 #include <cstdio>
 #include <stdio.h>
@@ -24,8 +23,8 @@ static lv_obj_t * saisie_label;
 static char saisie_clavier[6]; // Variable pour stocker la saisie du clavier
 
 // Déclaration E/S
-AnalogIn sensor(A0);       // Capteur de luminosité sur A0
-DigitalOut buzzer(D2);     // Buzzer sur D2
+AnalogIn sensor(A0); // Capteur de luminosité sur A0
+DigitalOut buzzer(D2); // Buzzer sur D2
 BufferedSerial pc(USBTX, USBRX, 9600);
 
 int main() {
@@ -45,33 +44,28 @@ int main() {
     threadLvgl.unlock();
     
     while (1) {
-        // Lecture de la valeur du capteur
         valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
         
-        // Utilisation du mutex pour les affichages LVGL
-        threadLvgl.lock();
+        threadLvgl.lock(); // Prise du mutex pour les affichages LVGL
         lv_affiche_text(valSensor); // Affichage de la valeur
         lv_affiche_time(); // Affichage de l'heure
         lv_affiche_saisie(); // Affichage de la saisie
-        
-        threadLvgl.unlock();
+        threadLvgl.unlock(); // Relacher le mutex pour les affichages LVGL
+
         if(valSensor < 0.5){ // Si valeur du capteur inférieur à 0.5 alors le buzzer sonne
             buzzer = 1;
         }
         else { // Sinon il ne sonne pas
             buzzer = 0;
         }
-        
-        // Tempo de 100 ms entre les lectures
-        ThisThread::sleep_for(100ms);
+        ThisThread::sleep_for(100ms); // Tempo de 100 ms
     }
 }
 
 // Fonction pour afficher la valeur du capteur sur un écran LVGL
 void lv_affiche_text(float valSensor) {
-    // Conversion de la valeur du capteur en chaîne de caractères
     char buf[32];
-    sprintf(buf, "Luminosite : %2.2f", valSensor); // Affiche sur l'écran la valeur du capteur
+    sprintf(buf, "Luminosite : %2.2f", valSensor); // Conversion de la valeur du capteur en chaîne de caractères
 
     // Création d'un style pour l'ombre
     static lv_style_t style_shadow;
@@ -108,9 +102,8 @@ void lv_affiche_time(void) {
     time_t now = time(NULL); // Récupérer l'heure actuelle
     struct tm *local_time = localtime(&now);
 
-    // Conversion de l'heure en chaîne de caractères
     char buf[32];
-    strftime(buf, sizeof(buf), "Heure actuelle : %H:%M:%S", local_time);
+    strftime(buf, sizeof(buf), "Heure actuelle : %H:%M:%S", local_time); // Conversion de l'heure en chaîne de caractères
 
     // Création ou mise à jour du label pour l'heure
     if (time_label == nullptr) {
@@ -123,10 +116,9 @@ void lv_affiche_time(void) {
 }
 
 // Fonction pour afficher la saisie du clavier sur un écran LVGL
-void lv_affiche_saisie(void) {
-    // Conversion de la saisie en chaîne de caractères
+void lv_affiche_saisie(void) { 
     char buf[32];
-    snprintf(buf, sizeof(buf), "Heure saisie : %s", saisie_clavier);
+    snprintf(buf, sizeof(buf), "Heure saisie : %s", saisie_clavier); // Conversion de la saisie en chaîne de caractères
 
     // Création ou mise à jour du label pour la saisie
     if (saisie_label == nullptr) {
@@ -140,7 +132,7 @@ void lv_affiche_saisie(void) {
 
 // Fonction pour initialiser le clavier numérique
 void clavier(void) {
-    /* Création de la zone de texte */
+    // Création de la zone de texte
     ta = lv_textarea_create(lv_scr_act());
     lv_obj_add_event_cb(ta, ta_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_textarea_set_accepted_chars(ta, "0123456789:"); // Caractères acceptés
@@ -148,13 +140,12 @@ void clavier(void) {
     lv_textarea_set_one_line(ta, true); // Mode une ligne
     lv_textarea_set_text(ta, "");
 
-    /* Création d'un clavier */
+    // Création d'un clavier 
     kb = lv_keyboard_create(lv_scr_act());
     lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2); // Taille du clavier
     lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER); // Mode numérique
     lv_keyboard_set_textarea(kb, ta); // Associer le clavier à la zone de texte
 
-    // Positionner la zone de texte
     lv_obj_align(ta, LV_ALIGN_TOP_MID, 0, 50); // Aligner au milieu en haut avec un offset
 }
 
