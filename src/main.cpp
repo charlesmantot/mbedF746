@@ -164,8 +164,10 @@ static void ta_event_cb(lv_event_t * e) {
     lv_obj_t * ta = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         orga_saisie(e);
+        printf("Event value changed\n");
     } else if(code == LV_EVENT_READY) {
         // Entrée a été appuyée.
+        printf("Event ready\n");
         const char * txt = lv_textarea_get_text(ta);
         snprintf(saisie_clavier, sizeof(saisie_clavier), "%s", txt);
         printf("Text: %s\n", saisie_clavier); // Affiche la saisie dans le terminal
