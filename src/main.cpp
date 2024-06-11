@@ -22,12 +22,23 @@ static lv_obj_t * time_label;
 // Déclaration E/S
 AnalogIn sensor(A0);       // Capteur de luminosité sur A0
 DigitalOut buzzer(D2);     // Buzzer sur D2B
-BufferedSerial pc(USBTX, USBRX, 9600);
+BufferedSerial pc(USBTX, USBRX, 9600); // Pour la transmission des données
 
 int main() {
     float valSensor;
     buzzer = 1; // Active le buzzer (bruit)
     buzzer = 0; // Désactive le buzzer (pas de bruit)
+
+    // Définir l'heure à 09h15
+    struct tm t;
+    t.tm_year = 2024 - 1900; // Année depuis 1900
+    t.tm_mon = 6 - 1;        // Mois [0-11]
+    t.tm_mday = 11;          // Jour du mois
+    t.tm_hour = 9;           // Heure [0-23]
+    t.tm_min = 15;           // Minute [0-59]
+    t.tm_sec = 0;            // Seconde [0-59]
+    t.tm_isdst = -1;         // L'information sur l'heure d'été est déterminée par le système
+    set_time(mktime(&t));    // Régler l'heure du système
 
     // Initialiser le clavier et l'affichage de l'heure à l'écran
     threadLvgl.lock();
@@ -39,12 +50,11 @@ int main() {
         // Lecture de la valeur du capteur
         valSensor = sensor.read(); // Lire la valeur du capteur (0.0 à 1.0)
         
-        // Utilisation du mutex pour les affichages LVGL
-        threadLvgl.lock();
+        threadLvgl.lock(); // Prise du mutex pour les affichages LVGL
         lv_affiche_text(valSensor); // Affichage de la valeur
         lv_affiche_time(); // Affichage de l'heure
-        
-        threadLvgl.unlock();
+        threadLvgl.unlock(); // Relacher le mutex
+
         if(valSensor < 0.5){ // Si valeur du capteur inférieur à 0 alors le buzzer sonne
             buzzer = 1;
         }
@@ -52,8 +62,7 @@ int main() {
             buzzer = 0;
         }
         
-        // Tempo de 100 ms entre les lectures
-        ThisThread::sleep_for(100ms);
+        ThisThread::sleep_for(100ms); // Tempo de 100 ms entre les lectures
     }
 }
 
@@ -95,18 +104,13 @@ void lv_affiche_text(float valSensor) {
 
 // Fonction pour afficher l'heure actuelle sur un écran LVGL
 void lv_affiche_time(void) {
-    // Obtenir l'heure actuelle en UTC
+    // Obtenir l'heure actuelle
     time_t now = time(NULL);
-    struct tm *utc_time = gmtime(&now);
-
-    // Convertir l'heure UTC en heure de Paris
-    struct tm paris_time = *utc_time;
-    paris_time.tm_hour += 2; // Paris est UTC+2 en été (CEST)
-    mktime(&paris_time); // Normalise la structure tm
+    struct tm *local_time = localtime(&now);
 
     // Conversion de l'heure en chaîne de caractères
     char buf[32];
-    strftime(buf, sizeof(buf), "Heure : %H:%M:%S", &paris_time);
+    strftime(buf, sizeof(buf), "Heure : %H:%M:%S", local_time); // Au format h : min : sec
 
     // Création ou mise à jour du label pour l'heure
     if (time_label == nullptr) {
@@ -161,8 +165,3 @@ static void ta_event_cb(lv_event_t * e) {
     }
 }
 
-/*idee :
-  Pour le clavier numerique utiliser text auto-formatting
-  Pour affichage heure actu utiliser a clock from a meter
-  Pour affichage luminosite utiliser text shadow
-  */
