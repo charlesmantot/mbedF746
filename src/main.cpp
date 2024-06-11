@@ -111,8 +111,7 @@ void lv_affiche_time(void) {
     }
     lv_label_set_text(time_label, buf);
 
-    // Positionner l'heure en haut à gauche
-    lv_obj_align(time_label, LV_ALIGN_TOP_LEFT, 10, 10);
+    lv_obj_align(time_label, LV_ALIGN_TOP_LEFT, 10, 10);// Positionner l'heure en haut à gauche
 }
 
 // Fonction pour afficher la saisie du clavier sur un écran LVGL
@@ -124,10 +123,8 @@ void lv_affiche_saisie(void) {
     if (saisie_label == nullptr) {
         saisie_label = lv_label_create(lv_scr_act());
     }
-    lv_label_set_text(saisie_label, buf);
-
-    // Positionner la saisie en dessous de l'heure actuelle
-    lv_obj_align(saisie_label, LV_ALIGN_TOP_LEFT, 10, 40);
+    lv_label_set_text(saisie_label, buf);  
+    lv_obj_align(saisie_label, LV_ALIGN_TOP_LEFT, 10, 40); // Positionner la saisie en dessous de l'heure actuelle
 }
 
 // Fonction pour initialiser le clavier numérique
